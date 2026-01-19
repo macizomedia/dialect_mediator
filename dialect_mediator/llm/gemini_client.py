@@ -1,5 +1,6 @@
 import os
-import google.generativeai as genai
+
+from google import genai
 
 from dialect_mediator.core.models import Text, MediationResult
 from dialect_mediator.llm.base import BaseLLMClient
@@ -16,7 +17,7 @@ class GeminiClient(BaseLLMClient):
         if not api_key:
             raise RuntimeError("Missing GEMINI_API_KEY")
 
-        genai.configure(api_key=api_key)
+        self.client = genai.Client(api_key=api_key)
         self.model = model
         self.temperature = temperature
 
@@ -27,15 +28,15 @@ TEXT:
 {text.content}
 """
 
-        model = genai.GenerativeModel(self.model)
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config=genai.types.GenerateContentConfig(
                 temperature=self.temperature,
             ),
         )
 
-        content = response.text.strip()
+        content = response.text.strip() if response.text else ""
 
         return MediationResult(
             mediated_text=content,

@@ -1,3 +1,0 @@
-dialect_mediator
-scripts
-tests
